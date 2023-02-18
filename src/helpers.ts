@@ -14,6 +14,7 @@ export const getTheme = (key: string, fallback?: string) => {
 }
 
 export const getSystemTheme = (e?: MediaQueryList | MediaQueryListEvent) => {
+  if (isServer) return undefined
   if (!e) e = window.matchMedia(MEDIA)
   const isDark = e.matches
   const systemTheme = isDark ? 'dark' : 'light'
