@@ -4,7 +4,7 @@ export interface UseThemeContext {
   /** List of all available theme names */
   themes: string[]
   /** Update the theme */
-  setTheme: (setTheme: string | ((prev: string) => string) | ((prev: string) => string)) => void
+  setTheme: (setTheme: string | ((prev: string) => string)) => void
   /** Active theme name */
   theme: Accessor<string | undefined>
   /** If `enableSystem` is true and the active theme is "system", this returns whether the system preference resolved to "dark" or "light". Otherwise, identical to `theme` */

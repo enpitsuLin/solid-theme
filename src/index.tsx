@@ -67,12 +67,10 @@ const Theme: ParentComponent<ThemeProviderProps> = props => {
     }
   }
 
-  const setTheme = (
-    setTheme: ((prev: string) => string) | Exclude<string, Function> | ((prev: string) => string),
-  ) => {
-    setThemeSignal(setTheme)
+  const setTheme = (theme: string | ((prev: string) => string)) => {
+    const newTheme = setThemeSignal(theme)
     try {
-      localStorage.setItem(_props.storageKey, theme())
+      localStorage.setItem(_props.storageKey, newTheme)
     } catch (error) {}
   }
 
@@ -101,19 +99,6 @@ const Theme: ParentComponent<ThemeProviderProps> = props => {
     handleMediaQuery(media)
 
     onCleanup(() => media.removeListener(handleMediaQuery))
-  })
-
-  createEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key !== _props.storageKey) {
-        return
-      }
-
-      const theme = e.newValue || _props.defaultTheme
-      setTheme(theme)
-    }
-    window.addEventListener('storage', handleStorage)
-    onCleanup(() => window.removeEventListener('storage', handleStorage))
   })
 
   createEffect(() => {
