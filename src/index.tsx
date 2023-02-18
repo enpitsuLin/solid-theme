@@ -34,8 +34,7 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
 const defaultThemes = ['light', 'dark']
 
 const Theme: ParentComponent<ThemeProviderProps> = props => {
-  const _props = mergeProps<[ParentProps<ThemeProviderProps>, Required<ThemeProviderProps>]>(
-    props,
+  const _props = mergeProps<[Required<ThemeProviderProps>, ParentProps<ThemeProviderProps>]>(
     {
       themes: defaultThemes,
       enableSystem: true,
@@ -43,6 +42,7 @@ const Theme: ParentComponent<ThemeProviderProps> = props => {
       defaultTheme: props.enableSystem ?? true ? 'system' : 'light',
       attribute: 'data-theme',
     },
+    props,
   )
 
   const [theme, setThemeSignal] = createSignal(getTheme(_props.storageKey, _props.defaultTheme)!)
