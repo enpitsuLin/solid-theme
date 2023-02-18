@@ -1,24 +1,120 @@
-import { Accessor, Component, createComputed, createSignal } from 'solid-js'
+import {
+  createContext,
+  createEffect,
+  createMemo,
+  createSignal,
+  mergeProps,
+  onCleanup,
+  ParentComponent,
+  ParentProps,
+  useContext,
+} from 'solid-js'
+import { getSystemTheme, getTheme, MEDIA } from './helpers'
+import type { ThemeProviderProps, UseThemeContext } from './types'
 
-export function createHello(): [Accessor<string>, (to: string) => void] {
-  const [hello, setHello] = createSignal('Hello World!')
-
-  return [hello, (to: string) => setHello(`Hello ${to}!`)]
+const defaultContext: UseThemeContext = {
+  setTheme: () => {},
+  themes: [],
+  theme: () => undefined,
+  resolvedTheme: () => undefined,
 }
 
-export const Hello: Component<{ to?: string }> = props => {
-  const [hello, setHello] = createHello()
+const ThemeContext = createContext<UseThemeContext | undefined>(undefined)
 
-  // This will only log during development, console is removed in production
-  console.log('Hello World!')
+export const useTheme = () => useContext(ThemeContext) ?? defaultContext
 
-  createComputed(() => {
-    if (typeof props.to === 'string') setHello(props.to)
+export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
+  const context = useContext(ThemeContext)
+  if (context) return <>{props.children}</>
+  return <Theme {...props} />
+}
+
+const defaultThemes = ['light', 'dark']
+
+const Theme: ParentComponent<ThemeProviderProps> = props => {
+  const _props = mergeProps<[ParentProps<ThemeProviderProps>, Required<ThemeProviderProps>]>(
+    props,
+    {
+      themes: defaultThemes,
+      enableSystem: true,
+      storageKey: 'theme',
+      defaultTheme: props.enableSystem ?? true ? 'system' : 'light',
+      attribute: 'data-theme',
+    },
+  )
+
+  const [theme, setThemeSignal] = createSignal(getTheme(_props.storageKey, _props.defaultTheme)!)
+  const [resolvedTheme, setResolvedTheme] = createSignal(
+    getTheme(_props.storageKey, getSystemTheme()),
+  )
+
+  const applyTheme = (theme?: string) => {
+    let resolved = theme
+
+    if (theme === 'system' && _props.enableSystem) {
+      resolved = getSystemTheme()
+    }
+
+    const root = document.documentElement
+    if (props.attribute === 'class') {
+      root.classList.remove(..._props.themes)
+      if (resolved) root.classList.add(resolved)
+    } else {
+      if (resolved) root.setAttribute(_props.attribute, resolved)
+      else root.removeAttribute(_props.attribute)
+    }
+  }
+
+  const setTheme = (theme: string) => {
+    setThemeSignal(theme)
+    try {
+      localStorage.setItem(_props.storageKey, theme)
+    } catch (error) {}
+  }
+
+  const themeContext = createMemo(() => {
+    return {
+      themes: _props.themes,
+      theme: theme,
+      resolvedTheme: theme() === 'system' ? resolvedTheme : theme,
+      setTheme,
+    } as UseThemeContext
   })
 
-  return (
-    <>
-      <div>{hello()}</div>
-    </>
-  )
+  createEffect(() => {
+    const handleMediaQuery = (e: MediaQueryListEvent | MediaQueryList) => {
+      const resolved = getSystemTheme(e)
+      setResolvedTheme(resolved)
+
+      if (theme() === 'system' && _props.enableSystem) {
+        applyTheme('system')
+      }
+    }
+    const media = window.matchMedia(MEDIA)
+
+    // Intentionally use deprecated listener methods to support iOS & old browsers
+    media.addListener(handleMediaQuery)
+    handleMediaQuery(media)
+
+    onCleanup(() => media.removeListener(handleMediaQuery))
+  })
+
+  createEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key !== _props.storageKey) {
+        return
+      }
+
+      const theme = e.newValue || _props.defaultTheme
+      setTheme(theme)
+    }
+    window.addEventListener('storage', handleStorage)
+    onCleanup(() => window.removeEventListener('storage', handleStorage))
+  })
+
+  createEffect(() => {
+    applyTheme(theme())
+  })
+
+  return <ThemeContext.Provider value={themeContext()}>{_props.children}</ThemeContext.Provider>
 }

@@ -1,7 +1,7 @@
-import { createRoot, createSignal } from 'solid-js'
+import { renderHook } from '@solidjs/testing-library'
 import { isServer } from 'solid-js/web'
-import { describe, expect, it } from 'vitest'
-import { Hello, createHello } from '../src'
+import { describe, expect, it, vi } from 'vitest'
+import { ThemeProvider, useTheme } from '../src'
 
 describe('environment', () => {
   it('runs on server', () => {
@@ -10,42 +10,34 @@ describe('environment', () => {
   })
 })
 
-describe('createHello', () => {
-  it('Returns a Hello World signal', () =>
-    createRoot(dispose => {
-      const [hello] = createHello()
-      expect(hello()).toBe('Hello World!')
-      dispose()
-    }))
-
-  it('Changes the hello target', () =>
-    createRoot(dispose => {
-      const [hello, setHello] = createHello()
-      setHello('Solid')
-      expect(hello()).toBe('Hello Solid!')
-      dispose()
-    }))
-})
-
-describe('Hello', () => {
-  it('renders a hello component', () => {
-    createRoot(() => {
-      const container = (<Hello />) as HTMLDivElement
-      expect(container.outerHTML).toBe('<div>Hello World!</div>')
-    })
+describe('test', () => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
   })
+  it('useTheme can access ThemeProvider context', () => {
+    const { result } = renderHook(useTheme, { wrapper: ThemeProvider })
 
-  it('changes the hello target', () =>
-    createRoot(dispose => {
-      const [to, setTo] = createSignal('Solid')
-      const container = (<Hello to={to()} />) as HTMLDivElement
-      expect(container.outerHTML).toBe('<div>Hello Solid!</div>')
-      setTo('Tests')
+    const domAttrAccessor = () => document.documentElement.getAttribute('data-theme')
+    expect(result.themes).toEqual(['light', 'dark'])
 
-      // rendering is async
-      queueMicrotask(() => {
-        expect(container.outerHTML).toBe('<div>Hello Tests!</div>')
-        dispose()
-      })
-    }))
+    expect(result.theme()).toBe('system')
+    expect(result.resolvedTheme()).toBe('light')
+    result.setTheme('dark')
+    expect(result.theme()).toBe('dark')
+    expect(domAttrAccessor()).toBe('dark')
+
+    result.setTheme('light')
+    expect(result.theme()).toBe('light')
+    expect(domAttrAccessor()).toBe('light')
+  })
 })
