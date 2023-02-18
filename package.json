@@ -45,9 +45,9 @@
   "scripts": {
     "dev": "vite serve dev",
     "build": "tsup",
-    "test": "concurrently pnpm:test:*",
+    "test": "pnpm run \"/^test:.*/\"",
     "test:client": "vitest",
-    "test:ssr": "pnpm run test:client --mode ssr",
+    "test:ssr": "vitest --mode ssr",
     "prepublishOnly": "pnpm build",
     "format": "prettier --ignore-path .gitignore -w \"src/**/*.{js,ts,json,css,tsx,jsx}\" \"dev/**/*.{js,ts,json,css,tsx,jsx}\"",
     "update-deps": "pnpm up -Li",
@@ -58,7 +58,6 @@
   },
   "devDependencies": {
     "@solidjs/testing-library": "^0.6.1",
-    "concurrently": "^7.6.0",
     "esbuild": "^0.17.4",
     "esbuild-plugin-solid": "^0.5.0",
     "jsdom": "^21.1.0",
