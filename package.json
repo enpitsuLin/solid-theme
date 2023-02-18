@@ -1,17 +1,17 @@
 {
   "version": "0.0.0",
-  "name": "{{name_of_lib}}",
-  "description": "{{desc_of_lib}}",
+  "name": "solid-themes",
+  "description": "An abstraction for themes in your solidjs app.",
   "license": "MIT",
-  "author": "{{me}}",
+  "author": "enpitsulin",
   "contributors": [],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/{{me}}/{{name_of_lib}}.git"
+    "url": "git+https://github.com/enpitsulin/solid-themes.git"
   },
-  "homepage": "https://github.com/{{me}}/{{name_of_lib}}#readme",
+  "homepage": "https://github.com/enpitsulin/solid-themes#readme",
   "bugs": {
-    "url": "https://github.com/{{me}}/{{name_of_lib}}/issues"
+    "url": "https://github.com/enpitsulin/solid-themes/issues"
   },
   "files": [
     "dist"
