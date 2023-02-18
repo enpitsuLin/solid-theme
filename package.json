@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "name": "solid-themes",
   "description": "An abstraction for themes in your solidjs app.",
-  "license": "MIT",
+  "license": "MIT", 
   "author": "enpitsulin",
   "contributors": [],
   "repository": {
@@ -73,5 +73,5 @@
   "keywords": [
     "solid"
   ],
-  "packageManager": "pnpm@7.22.0"
+  "packageManager": "pnpm@7.27.0"
 }
