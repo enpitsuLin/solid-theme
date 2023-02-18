@@ -1,5 +1,5 @@
 {
-  "version": "0.0.0",
+  "version": "0.1.0",
   "name": "solid-themes",
   "description": "An abstraction for themes in your solidjs app.",
   "license": "MIT",
