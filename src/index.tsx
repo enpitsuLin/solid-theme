@@ -1,4 +1,5 @@
 import {
+  Accessor,
   createContext,
   createEffect,
   createMemo,
@@ -7,13 +8,14 @@ import {
   onCleanup,
   ParentComponent,
   ParentProps,
+  Setter,
   useContext,
 } from 'solid-js'
 import { getSystemTheme, getTheme, MEDIA } from './helpers'
 import type { ThemeProviderProps, UseThemeContext } from './types'
 
 const defaultContext: UseThemeContext = {
-  setTheme: () => {},
+  setTheme: (_ => {}) as Setter<string>,
   themes: [],
   theme: () => undefined,
   resolvedTheme: () => undefined,
@@ -65,10 +67,12 @@ const Theme: ParentComponent<ThemeProviderProps> = props => {
     }
   }
 
-  const setTheme = (theme: string) => {
-    setThemeSignal(theme)
+  const setTheme = (
+    setTheme: ((prev: string) => string) | Exclude<string, Function> | ((prev: string) => string),
+  ) => {
+    setThemeSignal(setTheme)
     try {
-      localStorage.setItem(_props.storageKey, theme)
+      localStorage.setItem(_props.storageKey, theme())
     } catch (error) {}
   }
 
