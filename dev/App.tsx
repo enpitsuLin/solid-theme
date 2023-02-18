@@ -1,27 +1,28 @@
-import type { Component } from 'solid-js'
-import logo from './logo.svg'
+import { Component } from 'solid-js'
+import { useTheme } from '../src'
 import styles from './App.module.css'
-import { Hello } from '../src'
+import logo from './logo.svg'
 
 const App: Component = () => {
+  const { theme, resolvedTheme, setTheme } = useTheme()
+
   return (
     <div class={styles.App}>
       <header class={styles.header}>
         <img src={logo} class={styles.logo} alt="logo" />
-        <h1>
-          <Hello></Hello>
-        </h1>
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
+        <h1>{theme()}</h1>
+        <h2>{resolvedTheme()}</h2>
+        <button
+          type="button"
+          onClick={() => {
+            setTheme(prev => {
+              if (prev === 'dark') return 'light'
+              return 'dark'
+            })
+          }}
         >
-          Learn Solid
-        </a>
+          toggle theme
+        </button>
       </header>
     </div>
   )
